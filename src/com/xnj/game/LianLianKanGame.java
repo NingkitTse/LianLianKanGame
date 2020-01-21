@@ -74,6 +74,18 @@ public class LianLianKanGame extends JFrame implements ActionListener {
     }
 
     private void init() {
+        initFrastructure(); // 初始化结构
+        initProgressBar(); // 初始化时间进度条
+        initScore(); // 初始化分数
+        initMsg(); // 舒适化消息
+        initDataGrid(); // 初始化数据
+        initButton(); // 初始化按钮
+        initSouthFunBtn(); // 初始化功能按钮
+        this.setVisible(true);
+        printLog("===开始游戏===");
+    }
+
+    private void initFrastructure() {
         this.setLayout(new BorderLayout());
         this.setBounds(400, 200, 600, 500);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -83,22 +95,16 @@ public class LianLianKanGame extends JFrame implements ActionListener {
         this.add(north, BorderLayout.NORTH);
         this.add(center, BorderLayout.CENTER);
         this.add(south, BorderLayout.SOUTH);
-
         center.setLayout(new GridLayout(ROW, COL));
-        initProgressBar();
-        initScore();
-        initMsg();
-        initDataGrid();
-        initButton();
+    }
 
+    private void initSouthFunBtn() {
         south.add(resetBtn);
         south.add(regameBtn);
         south.add(exitBtn);
         resetBtn.addActionListener(this);
         regameBtn.addActionListener(this);
         exitBtn.addActionListener(this);
-        this.setVisible(true);
-        printLog("===开始游戏===");
     }
 
     public JProgressBar getProgressBar() {
