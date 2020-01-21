@@ -26,6 +26,9 @@ import javax.swing.JProgressBar;
 
 /**
  * 连连看游戏
+ * <p>
+ * 优先看init方法
+ * </p>
  * 
  * @author w24882 xieningjie
  * @date 2020年1月21日
@@ -61,17 +64,17 @@ public class LianLianKanGame extends JFrame implements ActionListener {
     LinkedList<GamePoint> eliminateStack = new LinkedList<>();
     File logFile = new File("board.log");
     BufferedWriter bufferedWriter;
-    int score = 0;
-    int scoreDelta = 100;
-    int doubleHitCount = 0;
-    int totalBlock;
-    int totalTime = 60000;
+    int score = 0; // 分数
+    int scoreDelta = 100; // 连击递增分数值
+    int doubleHitCount = 0; // 连击数
+    int totalCard; // 总共卡片数量
+    int totalTime = 60000; // 总共时间
     int bonus = totalTime / 2; // 奖励时间
-    int remainTime = totalTime;
-    long lastHitTime = 0;
-    boolean terminate = false;
-    boolean paused = false;
-    Thread progressBarThread;
+    int remainTime = totalTime; // 剩余时间
+    long lastHitTime = 0; // 最后一次连击时间
+    boolean terminate = false; // 停止标识
+    boolean paused = false; // 暂停标识
+    Thread progressBarThread; // 进度条线程
 
     public LianLianKanGame() {
         super("连连看");
@@ -144,6 +147,7 @@ public class LianLianKanGame extends JFrame implements ActionListener {
                                 paused = true;
                                 setMsg("游戏结束！！");
                                 JOptionPane.showMessageDialog(null, "游戏结束！！", "游戏结束！！", JOptionPane.ERROR_MESSAGE);
+                                recordScore();
                             }
                             Thread.sleep(1000);
                         } catch (InterruptedException e) {
@@ -219,7 +223,7 @@ public class LianLianKanGame extends JFrame implements ActionListener {
                 dataGrid[i][j] = new GameCard();
             }
         }
-        totalBlock = ROW * COL;
+        totalCard = ROW * COL;
 
         for (int i = 0; i < ROW * COL / 2; i++) {
             int x = 0;
@@ -293,6 +297,8 @@ public class LianLianKanGame extends JFrame implements ActionListener {
     }
 
     private void resetClick() {
+        firstClickBtn = null;
+        secondClickBtn = null;
         clickTimes = 0;
     }
 
@@ -403,11 +409,11 @@ public class LianLianKanGame extends JFrame implements ActionListener {
         score += scoreDelta * doubleHitCount;
         setScore();
 
-        totalBlock -= 2;
-        if (totalBlock == 0) {
+        totalCard -= 2;
+        if (totalCard == 0) {
             JOptionPane.showMessageDialog(null, "恭喜过关！！ 奖励时间：" + bonus / 1000 + "s", "恭喜过关！！",
                     JOptionPane.INFORMATION_MESSAGE);
-            recordScore();
+            // recordScore();
             center.setVisible(false);
             initDataGrid();
             ArrayList<JButton> buttons = prepareButton();
@@ -559,6 +565,7 @@ public class LianLianKanGame extends JFrame implements ActionListener {
 
     private void exit() {
         printLog("======退出游戏======");
+        recordScore();
         System.exit(0);
     }
 
