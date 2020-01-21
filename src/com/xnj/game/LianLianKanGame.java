@@ -10,6 +10,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,6 +20,7 @@ import java.util.Random;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
@@ -62,7 +64,9 @@ public class LianLianKanGame extends JFrame implements ActionListener {
     int score = 0;
     int scoreDelta = 100;
     int doubleHitCount = 0;
+    int totalBlock;
     int totalTime = 60000;
+    int bonus = totalTime / 2; // 奖励时间
     int remainTime = totalTime;
     long lastHitTime = 0;
     boolean terminate = false;
@@ -137,7 +141,9 @@ public class LianLianKanGame extends JFrame implements ActionListener {
                             remainTime -= 1000;
                             getProgressBar().setValue((int) ((remainTime + 0.0) / totalTime * 100));
                             if (remainTime < 0) {
-                                break;
+                                paused = true;
+                                setMsg("游戏结束！！");
+                                JOptionPane.showMessageDialog(null, "游戏结束！！", "游戏结束！！", JOptionPane.ERROR_MESSAGE);
                             }
                             Thread.sleep(1000);
                         } catch (InterruptedException e) {
@@ -213,6 +219,7 @@ public class LianLianKanGame extends JFrame implements ActionListener {
                 dataGrid[i][j] = new GameCard();
             }
         }
+        totalBlock = ROW * COL;
 
         for (int i = 0; i < ROW * COL / 2; i++) {
             int x = 0;
@@ -235,12 +242,20 @@ public class LianLianKanGame extends JFrame implements ActionListener {
             resetClick();
             exit();
         } else if (source == resetBtn) {
+            if (paused) {
+                JOptionPane.showMessageDialog(null, "游戏结束！！", "游戏结束！！", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             resetClick();
             reset();
         } else if (source == regameBtn) {
             resetClick();
             regame();
         } else {
+            if (paused) {
+                JOptionPane.showMessageDialog(null, "游戏结束！！", "游戏结束！！", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             clickTimes = (clickTimes + 1) % 2;
             if (clickTimes == 0) {
                 outer: for (int i = 1; i <= ROW; ++i) {
@@ -388,8 +403,42 @@ public class LianLianKanGame extends JFrame implements ActionListener {
         score += scoreDelta * doubleHitCount;
         setScore();
 
+        totalBlock -= 2;
+        if (totalBlock == 0) {
+            JOptionPane.showMessageDialog(null, "恭喜过关！！ 奖励时间：" + bonus / 1000 + "s", "恭喜过关！！",
+                    JOptionPane.INFORMATION_MESSAGE);
+            recordScore();
+            center.setVisible(false);
+            initDataGrid();
+            ArrayList<JButton> buttons = prepareButton();
+            adapterButton(buttons);
+            center.setVisible(true);
+            remainTime += bonus;
+        }
+
         printRemoveLog();
         genEffect();
+    }
+
+    private void recordScore() {
+        try {
+            InetAddress addr = InetAddress.getLocalHost();
+            String ip = addr.getHostAddress().toString(); // 获取本机ip
+            String hostName = addr.getHostName().toString(); // 获取本机计算机名称
+
+            BufferedWriter bw = new BufferedWriter(new FileWriter(new File("history.txt"), true));
+            bw.append("===========================================");
+            bw.newLine();
+            bw.append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+            bw.newLine();
+            bw.append("用户：" + hostName + ", " + ip);
+            bw.newLine();
+            bw.append("分数：" + score);
+            bw.newLine();
+            bw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -494,6 +543,7 @@ public class LianLianKanGame extends JFrame implements ActionListener {
         shuffleDataGrid();
         ArrayList<JButton> buttons = prepareButton();
         adapterButton(buttons);
+        paused = false;
         center.setVisible(true);
     }
 
