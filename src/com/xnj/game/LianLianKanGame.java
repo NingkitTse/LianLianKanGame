@@ -354,11 +354,11 @@ public class LianLianKanGame extends JFrame implements ActionListener {
     }
 
     private boolean recursion(int changeTime, boolean[][] visited, int[] dir, int x, int y) {
+    	if (changeTime > 2) { // 最多拐两次弯
+    		return false;
+    	}
         if (x1 == x && y1 == y) {
             return true;
-        }
-        if (changeTime > 2) { // 最多拐两次弯
-            return false;
         }
         if (boundValid(x, y) && dataGrid[x][y].value == 0 && !visited[x][y]) { // 检测路线是否碰到边界，是否碰到障碍，是否已经走过
             visited[x][y] = true; // 走过的路径标记一下
